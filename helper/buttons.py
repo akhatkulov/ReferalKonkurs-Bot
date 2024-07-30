@@ -43,3 +43,9 @@ def send_contact():
 def keyboard_rm():
     markup = ReplyKeyboardRemove()
     return markup
+
+def start_go():
+    x = InlineKeyboardMarkup(row_width=1)
+    btn1 = InlineKeyboardButton(text="Boshlash 🚀",callback_data="start_go")
+    x.add(btn1)
+    return x

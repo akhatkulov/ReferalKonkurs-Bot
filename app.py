@@ -5,12 +5,13 @@ from io import BytesIO
 from alch import User, create_user, get_step, put_step, put_ball, get_ball, user_count, get_all_user, \
     get_channel, put_channel, get_channel_with_id, delete_channel,get_list,get_name,get_phone,put_name,put_phone
 
-from helper.buttons import admin_buttons,channel_control,join_key,home_keys,send_contact,keyboard_rm
-from helper.functions import mini_decrypt, mini_crypt,create_excel_file
-bot = telebot.TeleBot('7223905979:AAGRsNXcFV5tNLzxXww_LmXEkOGbllL6fUM', parse_mode="html")
+from helper.buttons import admin_buttons,channel_control,join_key,home_keys,send_contact,keyboard_rm,start_go
+from helper.functions import mini_decrypt, mini_crypt,create_data
+import conf
+bot = telebot.TeleBot(conf.BOT_TOKEN, parse_mode="html")
 
 
-admin_id = 6521895096
+admin_id = conf.ADMIN_id
 
 def join(user_id):
     try:
@@ -38,17 +39,28 @@ def start(message):
     
 
     if message.text == "/start" and join(message.chat.id):
-        bot.send_message(message.chat.id,
-                             f"<b>Salom, {message.chat.first_name} botimizga xush kelibsiz</b>\n🔗Taklif linki:\nhttps://t.me/Nasibadjumayevabot?start={mini_crypt(str(message.chat.id))}",
+        if get_name(cid=message.chat.id) != message.chat.first_name:
+            bot.send_message(message.chat.id,f"<b>Bu sizning shaxsiy linkingiz, bepul darsga do’stlaringizni shu link orqali taklif qila olasiz✅</b>\n\nTaklif linki:\nhttps://t.me/{conf.BOT_NAME}?start={mini_crypt(str(message.chat.id))} \n\n<b>🎁 Unutmang, qancha ko’p inson sizning shaxsiy linkingizdan orqali ushbu botdan foydalansa, sizning g’olib bo’lish ehtimolingiz shunchalik ortadi.\nOmad tilayman!</b>",
                              parse_mode='html',reply_markup=home_keys())
         try:
             create_user(cid=message.chat.id,name=message.chat.first_name)
         except Exception as e:
             print(f"Error creating user: {str(e)}")
         put_step(cid=message.chat.id, step="!!!")
-        if get_name(cid=message.chat.id) == "Qoqindiq":
-            bot.send_message(chat_id=message.chat.id,text="Ismingiz yuboring")
-            put_step(cid=message.chat.id,step="name")
+        if get_name(cid=message.chat.id) == message.chat.first_name:
+            msg_text_first = f"""Assalomu alaykum {message.chat.first_name}
+
+O’yin ishtirokchisiga aylanganingiz bilan tabriklayman!🥳
+
+Bu bot orqali o’zingiz uchun shaxsiy linkni qo’lga kiritasiz! """
+            bot.send_video_note(
+                chat_id=message.chat.id,
+                data=conf.VIDEO_NOTE_LINK, 
+                duration=None, 
+                length=None, 
+                reply_markup=start_go()  
+            )
+
         
 
     if "/start" in message.text and len(message.text) > 6:
@@ -70,12 +82,24 @@ def start(message):
         if res == message.chat.id:
             bot.send_message(chat_id=res,text="O'zingizni taklif qila olmaysizku, axir!")
         
-        if get_name(cid=message.chat.id) == "Qoqindiq":
-            bot.send_message(chat_id=message.chat.id,text="Ismingiz yuboring")
-            put_step(cid=message.chat.id,step="name")
+        if get_name(cid=message.chat.id) == message.chat.first_name:
+            msg_text_first = f"""Assalomu alaykum {message.chat.first_name}
+
+O’yin ishtirokchisiga aylanganingiz bilan tabriklayman!🥳
+
+Bu bot orqali o’zingiz uchun shaxsiy linkni qo’lga kiritasiz! """
+
+            bot.send_video_note(
+                chat_id=message.chat.id,
+                data=conf.VIDEO_NOTE_LINK, 
+                duration=None, 
+                length=None, 
+                reply_markup=start_go()  
+            )
+        
+
         else:
-            bot.send_message(message.chat.id,
-                             f"<b>Salom, {message.chat.first_name} botimizga xush kelibsiz</b>\n🔗Taklif linki:\nhttps://t.me/Nasibadjumayevabot?start={mini_crypt(str(message.chat.id))}",
+            bot.send_message(message.chat.id,f"<b>Bu sizning shaxsiy linkingiz, bepul darsga do’stlaringizni shu link orqali taklif qila olasiz✅</b>\n\nTaklif linki:\nhttps://t.me/{conf.BOT_NAME}?start={mini_crypt(str(message.chat.id))} \n\n<b>🎁 Unutmang, qancha ko’p inson sizning shaxsiy linkingizdan orqali ushbu botdan foydalansa, sizning g’olib bo’lish ehtimolingiz shunchalik ortadi.\nOmad tilayman!</b>",
                              parse_mode='html',reply_markup=home_keys())
 
 
@@ -83,7 +107,7 @@ def start(message):
 def more(message):
     if message.text == "/send" and message.chat.id == admin_id:
         try:
-            with open("data/data.xlsx", 'rb') as file:
+            with open(conf.DATA_PATH, 'rb') as file:
                 bot.send_document(message.chat.id, file)
         except:
             bot.send_message(chat_id=message.chat.id,text="Fayl mavjud emas!")
@@ -132,20 +156,21 @@ def more(message):
 
 @bot.message_handler(content_types=['contact'])
 def get_contacts(message):
-    if get_step(message.chat.id):
+    if get_step(message.chat.id) and join(message.chat.id):
         contact = message.contact
         put_phone(cid=message.chat.id,phone=contact.phone_number)
-        bot.send_message(message.chat.id, f"""<b>Salom, {get_name(cid=message.chat.id)} botimizga xush kelibsiz</b>\n🔗Taklif linki:\nhttps://t.me/Nasibadjumayevabot?start={mini_crypt(str(message.chat.id))}""",reply_markup=home_keys())    
-        data = [
-            [get_name(cid=message.chat.id), get_phone(cid=message.chat.id)]
-        ]
-        create_excel_file(filename="data/data.xlsx",data=data,)
-        
+        bot.send_message(message.chat.id,f"<b>Bu sizning shaxsiy linkingiz, bepul darsga do’stlaringizni shu link orqali taklif qila olasiz✅</b>\n\nTaklif linki:\nhttps://t.me/{conf.BOT_NAME}?start={mini_crypt(str(message.chat.id))} \n\n<b>🎁 Unutmang, qancha ko’p inson sizning shaxsiy linkingizdan orqali ushbu botdan foydalansa, sizning g’olib bo’lish ehtimolingiz shunchalik ortadi.\nOmad tilayman!</b>",
+                             parse_mode='html',reply_markup=home_keys())
+        data = [get_name(cid=message.chat.id), get_phone(cid=message.chat.id)]
+        create_data(file_path=conf.DATA_PATH,name=data[0],phone=data[1])
         put_step(cid=message.chat.id,step="!!!")
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):  
+    if call.data == "start_go" and join(call.message.chat.id):
+        bot.send_message(chat_id=call.message.chat.id,text="Ismingiz yuboring")
+        put_step(cid=call.message.chat.id,step="name")
     if call.data == "/start" and join(call.message.chat.id):
-        bot.send_message(call.message.chat.id, f"""<b>Salom, {call.message.chat.first_name} botimizga xush kelibsiz</b>\n🔗Taklif linki:\nhttps://t.me/Nasibadjumayevabot?start={mini_crypt(str(call.message.chat.id))}""",reply_markup=home_keys())  
+        bot.send_message(chat_id=call.message.chat.id,text="<b>Obuna tasdiqlandi✅</b>",parse_mode="html") 
     if call.data == "stat" and str(call.message.chat.id) == str(admin_id):
         bot.send_message(chat_id=call.message.chat.id, text=f"Foydalanuvchilar soni: {user_count()}")
     if call.data == "send" and str(call.message.chat.id) == str(admin_id):
