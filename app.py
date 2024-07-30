@@ -53,6 +53,7 @@ def start(message):
 O’yin ishtirokchisiga aylanganingiz bilan tabriklayman!🥳
 
 Bu bot orqali o’zingiz uchun shaxsiy linkni qo’lga kiritasiz! """
+            bot.send_message(chat_id=message.chat.id,text=msg_text_first)
             bot.send_video_note(
                 chat_id=message.chat.id,
                 data=conf.VIDEO_NOTE_LINK, 
@@ -88,7 +89,7 @@ Bu bot orqali o’zingiz uchun shaxsiy linkni qo’lga kiritasiz! """
 O’yin ishtirokchisiga aylanganingiz bilan tabriklayman!🥳
 
 Bu bot orqali o’zingiz uchun shaxsiy linkni qo’lga kiritasiz! """
-
+            bot.send_message(chat_id=message.chat.id,text=msg_text_first)
             bot.send_video_note(
                 chat_id=message.chat.id,
                 data=conf.VIDEO_NOTE_LINK, 
